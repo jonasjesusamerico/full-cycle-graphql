@@ -41,3 +41,5 @@ type Mutation {
   createCategory(input: NewCategory!): Category!
   createCourse(input: NewCourse!): Course!
 }
+
+# Comando para gerar os dados: go run github.com/99designs/gqlgen generate
