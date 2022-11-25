@@ -2,27 +2,42 @@
 #
 # https://gqlgen.com/getting-started/
 
-type Todo {
-  id: ID!
-  text: String!
-  done: Boolean!
-  user: User!
-}
+# Local em que você especifica as estruturas que será gerado.
 
-type User {
+type Category {
   id: ID!
   name: String!
+  description: String
+  courses: [Course!]!
 }
 
+type Course {
+  id: ID!
+  name : String!
+  description: String
+  category: Category!
+}
+
+# Define quais são os campos necessário para criar determinada estrutura
+input NewCategory {
+  name: String!
+  description: String
+}
+
+input NewCourse {
+  name: String!
+  description: String
+  categoryId: ID!
+}
+
+# Define como fazer as consultas
 type Query {
-  todos: [Todo!]!
+  categories: [Category!]!
+  courses: [Course!]!
 }
 
-input NewTodo {
-  text: String!
-  userId: String!
-}
-
+# Utilizado para quando você deseja alterar dado
 type Mutation {
-  createTodo(input: NewTodo!): Todo!
+  createCategory(input: NewCategory!): Category!
+  createCourse(input: NewCourse!): Course!
 }
