@@ -5,10 +5,33 @@ package graph
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/jonasjesusamerico/full-cycle-graphql/graph/generated"
 	"github.com/jonasjesusamerico/full-cycle-graphql/graph/model"
 )
+
+// Courses is the resolver for the courses field.
+func (r *categoryResolver) Courses(ctx context.Context, obj *model.Category) ([]*model.Course, error) {
+	courses, err := r.CourseDB.FindByCategoryID(obj.ID)
+	if err != nil {
+		return nil, err
+	}
+	var coursesModel []*model.Course
+	for _, course := range courses {
+		coursesModel = append(coursesModel, &model.Course{
+			ID:          course.ID,
+			Name:        course.Name,
+			Description: &course.Description,
+		})
+	}
+	return coursesModel, nil
+}
+
+// Category is the resolver for the category field.
+func (r *courseResolver) Category(ctx context.Context, obj *model.Course) (*model.Category, error) {
+	panic(fmt.Errorf("not implemented: Category - category"))
+}
 
 // CreateCategory is the resolver for the createCategory field.
 func (r *mutationResolver) CreateCategory(ctx context.Context, input model.NewCategory) (*model.Category, error) {
@@ -37,12 +60,12 @@ func (r *mutationResolver) CreateCourse(ctx context.Context, input model.NewCour
 }
 
 // Categories is the resolver for the categories field.
-func (r *queryResolver) Categories(ctx context.Context) (categoriesModel []*model.Category, err error) {
+func (r *queryResolver) Categories(ctx context.Context) ([]*model.Category, error) {
 	categories, err := r.CategoryDB.FindAll()
 	if err != nil {
-		return
+		return nil, err
 	}
-
+	var categoriesModel []*model.Category
 	for _, category := range categories {
 		categoriesModel = append(categoriesModel, &model.Category{
 			ID:          category.ID,
@@ -50,7 +73,7 @@ func (r *queryResolver) Categories(ctx context.Context) (categoriesModel []*mode
 			Description: &category.Description,
 		})
 	}
-	return
+	return categoriesModel, nil
 }
 
 // Courses is the resolver for the courses field.
@@ -70,11 +93,19 @@ func (r *queryResolver) Courses(ctx context.Context) ([]*model.Course, error) {
 	return coursesModel, nil
 }
 
+// Category returns generated.CategoryResolver implementation.
+func (r *Resolver) Category() generated.CategoryResolver { return &categoryResolver{r} }
+
+// Course returns generated.CourseResolver implementation.
+func (r *Resolver) Course() generated.CourseResolver { return &courseResolver{r} }
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
+type categoryResolver struct{ *Resolver }
+type courseResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
